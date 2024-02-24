@@ -3,11 +3,13 @@ from discord.ext import commands
 import discord
 import aiohttp
 from imageProcessing import read_roi_and_create_output_for_amounts
+from db import store_deads_info
 
 config = dotenv_values('.env.dev')
 
 bot_token = config['BOT_TOKEN']
 channel_id = int(config['CHANNEL_ID'])
+debug = True if config['DEBUG'] == 'True' else False
 
 bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
 
@@ -17,24 +19,45 @@ async def on_ready():
     channel = bot.get_channel(channel_id)
 
 @bot.command()
-async def add(ctx, x, y):
-    result = int(x) + int(y)
-    await ctx.send(result)
-
-@bot.command()
 async def deads(ctx):
+
+    user_id = ctx.author.id
+    columns = {
+        't4inf':'E',
+        't4arch':'F',
+        't4cav':'G',
+        't4siege':'H',
+        't5inf':'I',
+        't5arch':'J',
+        't5cav':'K',
+        't5siege':'L'
+    }
+    
     if ctx.message.attachments:
         for attachment in ctx.message.attachments:
             if any(attachment.filename.lower().endswith(image_ext) for image_ext in ['.png', '.jpg', '.jpeg', '.PNG', '.JPG', '.JPEG', '.bmp', '.webp']):
                 async with aiohttp.ClientSession() as session:
                     async with session.get(attachment.url) as resp:
                         if resp.status == 200:
+                            await ctx.send('Processing data...')
                             image_data = await resp.read()
                             result = read_roi_and_create_output_for_amounts(image_data)
-                            await ctx.send(f'{result}')
+
+                            if result == {}:
+                                await ctx.send('There was an issue in processing your image. Please try again.')
+                                break
+
+                            if debug == False:
+                                await ctx.send('Storing data...')
+                                for k, v in result.items():
+                                    store_deads_info(user_id, v, columns[k])
+                                await ctx.send(f'{result} stored!')
+                            else:
+                                print(result)
+
                         else:
-                            await ctx.send('Error in image processing')
+                            await ctx.send('Error in image processing. Please try again')
     else:
-        await ctx.send('No image found in the message')
+        await ctx.send('No image found in the message.')
 
 bot.run(bot_token)

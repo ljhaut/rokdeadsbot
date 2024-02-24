@@ -2,6 +2,12 @@ import cv2
 from ultralytics import YOLO
 import pytesseract
 from PIL import Image, ImageOps
+from dotenv import dotenv_values
+import numpy as np
+
+config = dotenv_values('.env.dev')
+
+debug = True if config['DEBUG'] == 'True' else False
 
 def convert_coordinates(center_x, cetner_y, width, height):
     x_min = center_x - (width / 2)
@@ -100,9 +106,11 @@ def process_image_pairs_for_roi(pairs, image):
 
     return ocr_results
 
-def find_roi_for_input_image(path):
+def find_roi_for_input_image(image):
 
-    image = cv2.imread(path)
+    nparr = np.frombuffer(image, np.uint8)
+
+    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) # image to grayscale
 
@@ -122,17 +130,19 @@ def find_roi_for_input_image(path):
 
     return roi
 
-def read_roi_and_create_output_for_amounts(path):
+def read_roi_and_create_output_for_amounts(image):
 
     model = YOLO(r'runs\detect\train2\weights\best.onnx')
 
-    roi = find_roi_for_input_image(path)
+    roi = find_roi_for_input_image(image)
 
-    """ results = model(roi) """
-    results = model(roi, save=True, save_txt=True)
+    if debug == False:
+        results = model(roi)
+    else:
+        results = model(roi, save=True, save_txt=True)
 
     dict = {}
-
+    
     for i, box in enumerate(results[0].boxes.xywh):
         x, y, w, h = box
         class_id = int(results[0].boxes.cls[i])
@@ -146,11 +156,12 @@ def read_roi_and_create_output_for_amounts(path):
             else:
                 dict[class_name] = {'xywh':[x, y, w, h], 'conf':confidence}
 
-    print(dict)
     pairs = make_pairs(update_data_with_converted_coordinates(dict))
 
-    asd = process_image_pairs_for_roi(pairs, roi)
+    ocr_results = process_image_pairs_for_roi(pairs, roi)
+    
+    for k, v in ocr_results.items():
+        if '.' in v:
+            ocr_results[k] = v.replace('.', '')
 
-    print(asd)
-
-read_roi_and_create_output_for_amounts(r'new_images\Upload this screenshot (File responses)\Screenshot_20231026_224338_Rise of Kingdoms - joel hortelius.jpg')
+    return ocr_results

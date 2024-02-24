@@ -11,3 +11,4 @@ new_images
 *.cache
 *.ipynb
 testimageswithissues.txt
+.env.*

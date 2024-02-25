@@ -1,12 +1,5 @@
-deads
-anomalies
-goodpics
 runs
 train
-original_images
-augmented_images
-augmented_labels
-new_images
 *.csv
 *.cache
 *.ipynb
@@ -15,3 +8,5 @@ testimageswithissues.txt
 credentials.json
 token.json
 __pycache__
+config.yaml
+resources

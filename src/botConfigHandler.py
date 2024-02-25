@@ -5,7 +5,7 @@ def read_bot_config(file_path='bot_config.json'):
         return json.load(file)
 
 # params: config dict, id for designated discord channel
-def update_bot_config_id(config, id):
+def update_bot_config_channel_id(config, id):
     config['CHANNEL_ID'] = id
     write_bot_config(config)
 
@@ -18,7 +18,7 @@ def add_admins_to_bot_config(config, *admins):
 # params: config dict, admins as many discord ids as wanted separated with a comma
 def remove_admins_from_bot_config(config, *admins):
     for i in admins:
-        if i in config['ADMINS']:
+        if i in config['ADMINS'] and i not in config['SUPERUSERS']:
             config['ADMINS'].remove(i)
     write_bot_config(config)
 

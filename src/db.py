@@ -9,7 +9,7 @@ from dotenv import dotenv_values
 config = dotenv_values('.env.dev')
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-SPREADSHEET_ID = config['SPREADSHEET_ID']
+SPREADSHEET_ID = config['DEV_SPREADSHEET_ID']
 
 credentials = None
 if os.path.exists('token.json'):

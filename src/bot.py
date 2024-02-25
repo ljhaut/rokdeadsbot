@@ -4,11 +4,14 @@ import discord
 import aiohttp
 from imageProcessing import read_roi_and_create_output_for_amounts
 from db import store_deads_info
+from botConfigHandler import read_bot_config
 
+bot_config = read_bot_config()
 config = dotenv_values('.env.dev')
 
 bot_token = config['BOT_TOKEN']
-channel_id = int(config['CHANNEL_ID'])
+channel_id = bot_config['CHANNEL_ID']
+admins = bot_config['ADMINS']
 debug = True if config['DEBUG'] == 'True' else False
 
 bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
@@ -16,11 +19,14 @@ bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
 @bot.event
 async def on_ready():
     print("bot rdy")
-    channel = bot.get_channel(channel_id)
 
 @bot.command()
 async def deads(ctx):
 
+    if ctx.channel.id != channel_id:
+        print('Not the designated channel for the bot')
+        return
+    
     user_id = ctx.author.id
     columns = {
         't4inf':'E',
@@ -54,10 +60,11 @@ async def deads(ctx):
                                 await ctx.send(f'{result} stored!')
                             else:
                                 print(result)
+                                await ctx.send('Check console')
 
                         else:
                             await ctx.send('Error in image processing. Please try again')
     else:
-        await ctx.send('No image found in the message.')
+        await ctx.send('No image found in the message, try again by pasting an image to the message')
 
 bot.run(bot_token)

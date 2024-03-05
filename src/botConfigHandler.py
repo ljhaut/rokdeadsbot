@@ -1,6 +1,13 @@
 import json
+from dotenv import dotenv_values
 
-def read_bot_config(file_path='bot_config.json'):
+config = dotenv_values(".env.dev")
+DEBUG = True if config['DEBUG'] == 'True' else False
+bot_config_path = 'bot_config.json' if DEBUG == False else 'dev_bot_config.json'
+
+def read_bot_config(file_path=bot_config_path):
+    msg = 'Local dev conf' if DEBUG else 'Prod conf'
+    print(msg)
     with open(file_path, 'r') as file:
         return json.load(file)
 
@@ -22,6 +29,6 @@ def remove_admins_from_bot_config(config, *admins):
             config['ADMINS'].remove(i)
     write_bot_config(config)
 
-def write_bot_config(config, file_path='bot_config.json'):
+def write_bot_config(config, file_path=bot_config_path):
     with open(file_path, 'w') as file:
         json.dump(config, file, indent=4)

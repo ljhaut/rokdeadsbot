@@ -1,4 +1,5 @@
 {
     "ADMINS":[],
-    "CHANNEL_ID":12345
+    "SUPERUSERS": [],
+    "SHEET_NAME": ""
 }

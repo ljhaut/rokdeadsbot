@@ -4,9 +4,9 @@ def read_bot_config(file_path='bot_config.json'):
     with open(file_path, 'r') as file:
         return json.load(file)
 
-# params: config dict, id for designated discord channel
-def update_bot_config_channel_id(config, id):
-    config['CHANNEL_ID'] = id
+# params: config dict, name for sheet name
+def update_bot_config_sheet_name(config, name):
+    config['SHEET_NAME'] = name
     write_bot_config(config)
 
 # params: config dict, admins as many discord ids as wanted separated with a comma

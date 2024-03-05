@@ -10,6 +10,5 @@ token.json
 __pycache__
 config.yaml
 resources
-bot_config.json
 todo.txt
 trooplabels

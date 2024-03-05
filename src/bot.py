@@ -44,10 +44,11 @@ async def on_ready():
     print("Bot is online")
 
 async def send_deny_message_to_admins(bot, data, user, img):
-    admin = await bot.fetch_user(ADMINS[0])
-    embed = Embed(title='Report info', description=f'User display name: {user.display_name} \n User id: {user.id} \n result: {data}')
-    embed.set_image(url=img)
-    await admin.send(embed=embed)
+    for adm in ADMINS:
+        admin = await bot.fetch_user(adm)
+        embed = Embed(title='Report info', description=f'User display name: {user.display_name} \n User id: {user.id} \n result: {data}')
+        embed.set_image(url=img)
+        await admin.send(embed=embed)
 
 def make_dead_troops_embed(data, title='Confirm dead troops', desc='Please press CONFIRM if the count of dead troops is correct, otherwise press DENY.', confirm=False, deny=False):
     embed = Embed(title=title, description=desc, color=0x00ff00)
@@ -93,7 +94,8 @@ class DeadsCheck(View):
         self.clear_items()
         await interaction.response.edit_message(embed=new_embed, view=self)
         if DEBUG == False:
-            await send_deny_message_to_admins(self.bot, self.result, self.user, self.file_url)
+            if ADMINS:
+                await send_deny_message_to_admins(self.bot, self.result, self.user, self.file_url)
 
 @bot.tree.command()
 @app_commands.describe(file='Please attach a file')
@@ -167,7 +169,7 @@ async def setup(interaction: discord.Integration):
         @discord.ui.button(label='Change deads sheet', style=discord.ButtonStyle.primary)
         async def change_deads_sheet(self, interaction: discord.Interaction, button: Button):
             
-            class DeadsSheetModal(Modal, title='Input Form'):
+            class DeadsSheetModal(Modal, title='Change deads sheet name'):
                 answer = TextInput(label='Sheet name', placeholder='', required=True)
 
                 async def on_submit(self, interaction: discord.Integration):

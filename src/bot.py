@@ -5,6 +5,7 @@ from discord.ui import Button, View, Modal, TextInput
 from discord import app_commands, Embed
 import discord
 import aiohttp
+from datetime import datetime
 from imageProcessing import read_roi_and_create_output_for_amounts
 from db import store_deads_info
 from botConfigHandler import read_bot_config, update_bot_config_sheet_name
@@ -40,6 +41,8 @@ async def on_ready():
         print(f'Synced {len(synced)} command(s)')
     except Exception as e:
         print(e)
+    global is_deads_up
+    is_deads_up = True
     bot.loop.create_task(process_queue())
     print("Bot is online")
 
@@ -96,6 +99,8 @@ class DeadsCheck(View):
         if DEBUG == False:
             if ADMINS:
                 await send_deny_message_to_admins(self.bot, self.result, self.user, self.file_url)
+        else:
+            print('denied')
 
 @bot.tree.command()
 @app_commands.describe(file='Please attach a file')
@@ -111,7 +116,8 @@ async def deads(interaction: discord.Integration, file: discord.Attachment):
         return
 
     user = interaction.user
-    
+    print(f'\n{user} used command deads {datetime.now()}')
+
     if file:
         if any(file.filename.lower().endswith(image_ext) for image_ext in ['.png', '.jpg', '.jpeg', '.PNG', '.JPG', '.JPEG', '.bmp', '.webp']):
             await interaction.response.defer(ephemeral=True)
@@ -120,7 +126,7 @@ async def deads(interaction: discord.Integration, file: discord.Attachment):
                     if resp.status == 200:
                         image_data = await resp.read()
 
-                        embed = Embed(title='Image found in the message!', description='', color=0x00ff00)
+                        embed = Embed(title='Image found in the message! Processing the image...', description='', color=0x00ff00)
                         embed.set_image(url=file.url)
                         await interaction.followup.send(embed=embed,  ephemeral=True)
 
@@ -131,10 +137,7 @@ async def deads(interaction: discord.Integration, file: discord.Attachment):
                             await interaction.followup.send(embed=embed, ephemeral=True)
                             return
                         
-                        if DEBUG == False:
-                            embed = make_dead_troops_embed(result)
-                        else:
-                            embed = make_dead_troops_embed(result, 'Debug', 'Check console')
+                        embed = make_dead_troops_embed(result)
                         view = DeadsCheck(result, user, bot, file.url)
                         await interaction.followup.send(embed=embed, view=view, ephemeral=True)
 
@@ -158,7 +161,9 @@ async def setup(interaction: discord.Integration):
 
     - ON / OFF: turn the option to store deads on or off
     """
-
+    
+    print(f'\n{interaction.user} used command setup {datetime.now()}')
+    
     await interaction.response.defer(ephemeral=True)
 
     class SetupMenu(View):

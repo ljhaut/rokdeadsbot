@@ -3,7 +3,10 @@ from dotenv import dotenv_values
 
 config = dotenv_values(".env.dev")
 DEBUG = True if config['DEBUG'] == 'True' else False
-bot_config_path = 'bot_config.json' if DEBUG == False else 'dev_bot_config.json'
+
+""" bot_config_path = 'bot_config.json' if DEBUG == False else 'dev_bot_config.json' """
+
+bot_config_path = 'dev_bot_config.json'
 
 def read_bot_config(file_path=bot_config_path):
     msg = 'Local dev conf' if DEBUG else 'Prod conf'

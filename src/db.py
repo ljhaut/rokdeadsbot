@@ -11,7 +11,7 @@ from botConfigHandler import read_bot_config
 config = dotenv_values('.env.dev')
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-SPREADSHEET_ID = config['DEV_SPREADSHEET_ID']
+SPREADSHEET_ID = config['3090_SPREADSHEET_ID']
 
 def save_credentials(credentials):
     with open('token.json', 'w') as token:
@@ -49,13 +49,17 @@ async def store_deads_info(user_id, data):
         service = build('sheets', 'v4', credentials=credentials)
         sheets = service.spreadsheets()
 
+        #get all discord ids
         result = sheets.values().get(spreadsheetId=SPREADSHEET_ID, range="ID correspondance!C:C").execute()
         discord_ids = result.get('values', [])
+
+        #get all governor ids
         result = sheets.values().get(spreadsheetId=SPREADSHEET_ID, range="ID correspondance!A:A").execute()
         corresponding_gvrnr_ids = result.get('values', [])
 
         correct_gvrnr_id = None
 
+        #find the correct governor id based on it's position in array (i)
         for i, id in enumerate(discord_ids):
             if str(user_id) in id:
                 correct_gvrnr_id = corresponding_gvrnr_ids[i][0]

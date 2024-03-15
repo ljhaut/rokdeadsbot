@@ -113,33 +113,35 @@ def process_image_pairs_for_roi(pairs, image):
 
 # find the roi for all deads of the original image
 def find_roi_for_input_image(image):
+    try:
+        nparr = np.frombuffer(image, np.uint8)
 
-    nparr = np.frombuffer(image, np.uint8)
+        image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)   # convert image to cv2 readable format
 
-    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)   # convert image to cv2 readable format
+        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)    # image to grayscale
 
-    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)    # image to grayscale
+        _, binary = cv2.threshold(gray_image, 210, 255, cv2.THRESH_BINARY)  # binary threshold for grayscale image
 
-    _, binary = cv2.threshold(gray_image, 210, 255, cv2.THRESH_BINARY)  # binary threshold for grayscale image
+        contours, _ = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # find contours for the roi
 
-    contours, _ = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  # find contours for the roi
+        contour = max(contours, key=cv2.contourArea)    # largest contour
 
-    contour = max(contours, key=cv2.contourArea)    # largest contour
+        copy = image.copy()
 
-    copy = image.copy()
+        cv2.drawContours(copy, contour, -1, (255, 0, 0), 3)
 
-    cv2.drawContours(copy, contour, -1, (255, 0, 0), 3)
+        x, y, w, h = cv2.boundingRect(contour)  # create coords for roi 
 
-    x, y, w, h = cv2.boundingRect(contour)  # create coords for roi 
+        roi = image[y:y+h, x:x+w] # crop roi from image
 
-    roi = image[y:y+h, x:x+w] # crop roi from image
-
-    return roi
+        return roi
+    except:
+        print('no roi, bad picture')
 
 # "main" method
 def read_roi_and_create_output_for_amounts(image):
 
-    model = YOLO(r'runs\detect\train2\weights\best.onnx')   # load model
+    model = YOLO(r'runs\detect\train4\weights\best.onnx')   # load model
 
     roi = find_roi_for_input_image(image)
 

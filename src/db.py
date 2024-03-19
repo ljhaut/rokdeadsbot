@@ -44,6 +44,8 @@ async def store_deads_info(user_id, data):
     bot_config = read_bot_config()
     SHEET_NAME = bot_config['SHEET_NAME']
 
+    print(f'{data} stored for {user_id}')
+
     try:
         credentials = authenticate()
         service = build('sheets', 'v4', credentials=credentials)

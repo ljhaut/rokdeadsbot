@@ -62,7 +62,7 @@ def make_dead_troops_embed(data, title='Confirm dead troops', desc='Please press
         embed.add_field(name='', value=f'{emote_id[k]} {embed_troop_type[k]} | {v}', inline=False)
     
     if confirm:
-        return make_dead_troops_embed(data, title='Confirmed', desc='You pressed the confirm button for correct amount for dead troops')
+        return make_dead_troops_embed(data, title='Confirmed', desc='You pressed the confirm button for correct amount of dead troops')
     if deny:
         return make_dead_troops_embed(data, title='Denied', desc='You pressed the deny button for incorrect amount of dead troops')
 
@@ -116,7 +116,7 @@ async def deads(interaction: discord.Integration, file: discord.Attachment):
         return
 
     user = interaction.user
-    print(f'\n{user} used command deads {datetime.now()}')
+    print(f'\n------------------------\n{user} {user.id} used command deads {datetime.now()}')
 
     if file:
         if any(file.filename.lower().endswith(image_ext) for image_ext in ['.png', '.jpg', '.jpeg', '.PNG', '.JPG', '.JPEG', '.bmp', '.webp']):
@@ -133,7 +133,8 @@ async def deads(interaction: discord.Integration, file: discord.Attachment):
                         result = read_roi_and_create_output_for_amounts(image_data)
 
                         if result == {}:
-                            embed = Embed(title='Error', description='There was an issue in processing your image. Please try again.', color=0x00ff00)
+                            print('Empty results')
+                            embed = Embed(title='Error', description='There was an issue in processing your image or no t4/t5 units were found. Please try again.', color=0x00ff00)
                             await interaction.followup.send(embed=embed, ephemeral=True)
                             return
                         
@@ -142,7 +143,7 @@ async def deads(interaction: discord.Integration, file: discord.Attachment):
                         await interaction.followup.send(embed=embed, view=view, ephemeral=True)
 
                     else:
-                        embed = Embed(title='Error', description='Error in image processing. Please try again', color=0x00ff00)
+                        embed = Embed(title='Error', description='Error in image processing. Please try again.', color=0x00ff00)
                         await interaction.followup.send(embed=embed, ephemeral=True)
     else:
         embed = Embed(title='No Attachment', description='No attachment found in the message.', color=0x00ff00)
@@ -162,7 +163,7 @@ async def setup(interaction: discord.Integration):
     - ON / OFF: turn the option to store deads on or off
     """
     
-    print(f'\n{interaction.user} used command setup {datetime.now()}')
+    print(f'\n------------------------\n{interaction.user} {interaction.user.id} used command setup {datetime.now()}')
     
     await interaction.response.defer(ephemeral=True)
 

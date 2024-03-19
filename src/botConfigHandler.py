@@ -9,8 +9,6 @@ DEBUG = True if config['DEBUG'] == 'True' else False
 bot_config_path = 'dev_bot_config.json'
 
 def read_bot_config(file_path=bot_config_path):
-    msg = 'Local dev conf' if DEBUG else 'Prod conf'
-    print(msg)
     with open(file_path, 'r') as file:
         return json.load(file)
 

@@ -1,9 +1,7 @@
 runs
 train
-*.csv
 *.cache
 *.ipynb
-testimageswithissues.txt
 .env.*
 credentials.json
 token.json
